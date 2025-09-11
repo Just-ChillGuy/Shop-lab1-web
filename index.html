@@ -23,6 +23,7 @@
 
   <main>
     <section class="products" aria-label="Каталог соков">
+
       <!-- Карточки товаров -->
       <article class="product-card">
         <img src="images/tomato.jpg" alt="Томатный сок 1 л">
@@ -86,10 +87,11 @@
         <p class="price">80 ₽</p>
         <button class="add-cart" data-id="kvass" data-price="80">Добавить в корзину</button>
       </article>
+
     </section>
   </main>
 
- <!-- Модальное окно корзины -->
+  <!-- Модальное окно корзины -->
   <div id="cart-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cart-title">
     <div class="modal-panel" role="document">
       <header class="modal-header">
@@ -141,6 +143,7 @@
     </div>
   </div>
 
+  <!-- Toast уведомление -->
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
   <script src="script.js"></script>

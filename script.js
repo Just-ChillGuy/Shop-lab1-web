@@ -144,6 +144,18 @@ document.addEventListener('DOMContentLoaded', () => {
         b.addEventListener('click', () => closeModal(orderModal));
     });
 
+    // Open/Close center modal and hide/show cart button
+    function openCenterModal() {
+        centerModal.classList.remove('hidden');
+        cartButton.style.display = 'none'; // скрываем кнопку корзины
+        closeCenterBtn.focus();
+    }
+
+    function closeCenterModal() {
+        centerModal.classList.add('hidden');
+        cartButton.style.display = 'flex'; // показываем кнопку обратно
+    }
+
     // order submit: close cart and order, clear cart, show center modal
     orderForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -151,14 +163,13 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCart();
         closeModal(orderModal);
         closeModal(cartModal);
-        openModal(centerModal);
-        closeCenterBtn.focus();
+        openCenterModal();
     });
 
     // close center modal
-    closeCenterBtn.addEventListener('click', () => closeModal(centerModal));
+    closeCenterBtn.addEventListener('click', () => closeCenterModal());
     centerModal.querySelectorAll('.modal-backdrop').forEach(b => {
-        b.addEventListener('click', () => closeModal(centerModal));
+        b.addEventListener('click', () => closeCenterModal());
     });
 
     // close all modals with Escape
@@ -166,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape') {
             closeModal(orderModal);
             closeModal(cartModal);
-            closeModal(centerModal);
+            closeCenterModal();
         }
     });
 

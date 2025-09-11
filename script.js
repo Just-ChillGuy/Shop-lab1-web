@@ -7,7 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const cartModal = document.getElementById('cart-modal');
     const closeCartBtn = document.getElementById('close-cart');
     const closeCartFooterBtn = document.getElementById('close-cart-footer');
-    closeCartFooterBtn.addEventListener('click', () => closeModal(cartModal));
+    if (closeCartFooterBtn) {  // вот эта проверка нужна, чтобы не ломать скрипт
+        closeCartFooterBtn.addEventListener('click', () => closeModal(cartModal));
+    }
 
     const cartItemsEl = document.getElementById('cart-items');
     const cartTotalEl = document.getElementById('cart-total');

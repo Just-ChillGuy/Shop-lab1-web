@@ -324,3 +324,24 @@ button:hover {
     .product-card{width:100%;}
     .product-card img{height:140px;}
 }
+.modal-footer {
+    padding: 12px 14px;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between; /* чтобы крестик был слева, а кнопка оформить справа */
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-footer .footer-close {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid #d1d5db;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.modal-footer .footer-close:hover {
+    background: #f3f4f6;
+}
+

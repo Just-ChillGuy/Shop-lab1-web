@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Интернет-магазин соков</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Магазин соков</h1>
+  </header>
+
+  <main>
+    <section class="products">
+      <article class="product-card">
+        <img src="tomato.jpg" alt="Томатный сок 1 л">
+        <h3>Томатный сок</h3>
+        <p>Цена: 100 ₽</p>
+        <button class="add-cart" data-id="tomato">Добавить в корзину</button>
+      </article>
+
+      <article class="product-card">
+        <img src="orange.jpg" alt="Апельсиновый сок 1 л">
+        <h3>Апельсиновый сок</h3>
+        <p>Цена: 120 ₽</p>
+        <button class="add-cart" data-id="orange">Добавить в корзину</button>
+      </article>
+
+      <article class="product-card">
+        <img src="apple.jpg" alt="Яблочный сок 1 л">
+        <h3>Яблочный сок</h3>
+        <p>Цена: 90 ₽</p>
+        <button class="add-cart" data-id="apple">Добавить в корзину</button>
+      </article>
+
+      <article class="product-card">
+        <img src="grape.jpg" alt="Виноградный сок 1 л">
+        <h3>Виноградный сок</h3>
+        <p>Цена: 110 ₽</p>
+        <button class="add-cart" data-id="grape">Добавить в корзину</button>
+      </article>
+    </section>
+  </main>
+
+  <aside>
+    <details id="cart-dropdown">
+      <summary>Корзина (<span id="cart-count">0</span>)</summary>
+      <ul id="cart-items"></ul>
+      <div class="cart-total">Общая сумма: 0 ₽</div>
+      <button id="checkout">Оформить заказ</button>
+    </details>
+  </aside>
+
+  <div id="order-form" style="display:none;">
+    <h2>Оформление заказа</h2>
+    <form>
+      <label>Имя: <input type="text" required></label><br>
+      <label>Фамилия: <input type="text" required></label><br>
+      <label>Адрес: <input type="text" required></label><br>
+      <label>Телефон: <input type="tel" required></label><br>
+      <button type="submit">Создать заказ</button>
+    </form>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

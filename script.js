@@ -1,93 +1,142 @@
-// Получаем корзину из localStorage или пустой массив
-function getCart() {
-  return JSON.parse(localStorage.getItem('cart') || '[]');
-}
+// script.js — логика корзины и формы заказа
+document.addEventListener('DOMContentLoaded', () => {
 
-// Сохраняем корзину в localStorage
-function saveCart(cart) {
-  localStorage.setItem('cart', JSON.stringify(cart));
-}
+  const STORAGE_KEY = 'shop_cart_v1';
 
-// Рендер корзины
-function renderCart() {
-  const cart = getCart();
-  const list = document.getElementById('cart-items');
-  list.innerHTML = '';
-  let total = 0;
+  // Получаем корзину из localStorage или пустую
+  function getCart() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  }
 
-  cart.forEach(item => {
-    total += item.price * item.qty;
-    const li = document.createElement('li');
-    li.innerHTML = `
-      ${item.name}: ${item.price} ₽ × ${item.qty}
-      <button class="minus" data-id="${item.id}">-</button>
-      <button class="plus" data-id="${item.id}">+</button>
-      <button class="remove" data-id="${item.id}">×</button>
-    `;
-    list.appendChild(li);
+  // Сохраняем корзину в localStorage
+  function saveCart(cart) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+  }
+
+  // Рендер корзины: список, количество и общая сумма
+  function renderCart() {
+    const cart = getCart();
+    const list = document.getElementById('cart-items');
+    const countEl = document.getElementById('cart-count');
+    const totalEl = document.getElementById('cart-total');
+
+    list.innerHTML = '';
+    let total = 0;
+
+    cart.forEach(item => {
+      total += item.price * item.qty;
+
+      const li = document.createElement('li');
+      // внутренний HTML с контролами: минус, число, плюс, удалить
+      li.innerHTML = `
+        <div class="meta">
+          <strong>${escapeHtml(item.name)}</strong>
+          <div class="muted">${item.price} ₽ each</div>
+        </div>
+        <div class="controls">
+          <button class="minus" data-id="${item.id}" aria-label="уменьшить">-</button>
+          <span class="qty">${item.qty}</span>
+          <button class="plus" data-id="${item.id}" aria-label="увеличить">+</button>
+          <div style="width:12px"></div>
+          <div>${(item.price * item.qty).toLocaleString()} ₽</div>
+          <button class="remove" data-id="${item.id}" aria-label="удалить">×</button>
+        </div>
+      `;
+      list.appendChild(li);
+    });
+
+    countEl.textContent = cart.reduce((s, it) => s + it.qty, 0);
+    totalEl.textContent = total.toLocaleString();
+  }
+
+  // Экранирование текста (необязательно, но безопасно)
+  function escapeHtml(text) {
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return String(text).replace(/[&<>"']/g, m => map[m]);
+  }
+
+  // Добавление в корзину (используем data-атрибуты)
+  document.querySelectorAll('.add-cart').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      const price = Number(btn.dataset.price) || 0;
+      const name = btn.closest('.product-card').querySelector('h3').textContent.trim();
+
+      const cart = getCart();
+      const existing = cart.find(i => i.id === id);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({ id, name, price, qty: 1 });
+      }
+      saveCart(cart);
+      renderCart();
+      showToast('Товар добавлен в корзину');
+    });
   });
 
-  document.querySelector('.cart-total').textContent = `Общая сумма: ${total} ₽`;
-  document.getElementById('cart-count').textContent = cart.reduce((sum, i) => sum + i.qty, 0);
-}
-
-// Добавление товара
-document.querySelectorAll('.add-cart').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const productId = btn.dataset.id;
+  // Делегирование кликов внутри корзины: +, -, удалить
+  document.getElementById('cart-items').addEventListener('click', (e) => {
+    const id = e.target.dataset.id;
+    if (!id) return;
     let cart = getCart();
-    let item = cart.find(x => x.id === productId);
 
-    if (item) {
-      item.qty++;
-    } else {
-      cart.push({
-        id: productId,
-        name: btn.closest('.product-card').querySelector('h3').textContent,
-        price: +btn.closest('.product-card').querySelector('p').textContent.replace(/\D/g, ''),
-        qty: 1
-      });
+    if (e.target.classList.contains('remove')) {
+      cart = cart.filter(i => i.id !== id);
+    } else if (e.target.classList.contains('plus')) {
+      const it = cart.find(i => i.id === id);
+      if (it) it.qty += 1;
+    } else if (e.target.classList.contains('minus')) {
+      const it = cart.find(i => i.id === id);
+      if (it) {
+        it.qty -= 1;
+        if (it.qty <= 0) cart = cart.filter(i => i.id !== id);
+      }
     }
-
     saveCart(cart);
     renderCart();
   });
-});
 
-// Обработка кнопок в корзине
-document.getElementById('cart-items').addEventListener('click', (e) => {
-  const id = e.target.dataset.id;
-  let cart = getCart();
+  // Кнопка "Оформить заказ" — показать форму
+  document.getElementById('checkout').addEventListener('click', () => {
+    document.getElementById('order-form').classList.remove('hidden');
+    document.getElementById('order-form').setAttribute('aria-hidden', 'false');
+  });
 
-  if (e.target.classList.contains('remove')) {
-    cart = cart.filter(i => i.id !== id);
-  }
-  if (e.target.classList.contains('plus')) {
-    cart.find(i => i.id === id).qty++;
-  }
-  if (e.target.classList.contains('minus')) {
-    let item = cart.find(i => i.id === id);
-    item.qty--;
-    if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
+  // Кнопка "Отмена" закрывает форму
+  document.getElementById('cancel-order').addEventListener('click', () => {
+    document.getElementById('order-form').classList.add('hidden');
+    document.getElementById('order-form').setAttribute('aria-hidden', 'true');
+  });
+
+  // Обработка отправки формы: вывод сообщения и сброс корзины
+  document.getElementById('checkout-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    // Можно здесь собрать данные формы и показать подтверждение/сохранить куда-то
+    showToast('Заказ создан!');
+    localStorage.removeItem(STORAGE_KEY); // очищаем корзину
+    renderCart();
+    this.reset();
+    // скрываем форму
+    document.getElementById('order-form').classList.add('hidden');
+    document.getElementById('order-form').setAttribute('aria-hidden', 'true');
+  });
+
+  // Простой фидбек (тост)
+  const toastEl = document.getElementById('toast');
+  let toastTimer = null;
+  function showToast(text, ms = 2000) {
+    toastEl.textContent = text;
+    toastEl.classList.remove('hidden');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.add('hidden'), ms);
   }
 
-  saveCart(cart);
+  // Начальная отрисовка, восстанавливаем корзину из localStorage
   renderCart();
 });
-
-// Показ формы заказа
-document.getElementById('checkout').addEventListener('click', () => {
-  document.getElementById('order-form').style.display = 'block';
-});
-
-// Обработка отправки формы
-document.querySelector('#order-form form').addEventListener('submit', function(e) {
-  e.preventDefault();
-  alert('Заказ создан!');
-  localStorage.removeItem('cart');
-  renderCart();
-  this.reset();
-});
-
-// При загрузке страницы восстановить корзину
-document.addEventListener('DOMContentLoaded', renderCart);

@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const cartCountBadge = document.getElementById('cart-count-badge');
     const cartModal = document.getElementById('cart-modal');
     const closeCartBtn = document.getElementById('close-cart');
+    const closeCartFooterBtn = document.getElementById('close-cart-footer');
+    closeCartFooterBtn.addEventListener('click', () => closeModal(cartModal));
+
     const cartItemsEl = document.getElementById('cart-items');
     const cartTotalEl = document.getElementById('cart-total');
 

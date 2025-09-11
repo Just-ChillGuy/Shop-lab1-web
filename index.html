@@ -9,11 +9,22 @@
 <body>
   <header class="site-header">
     <h1>Магазин соков (1 л)</h1>
+
+    <!-- Кнопка-иконка корзины (фиксирована в правом верхнем углу через CSS) -->
+    <button id="cart-button" class="cart-button" aria-label="Открыть корзину" title="Корзина">
+      <!-- SVG иконка корзины -->
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M3 3h2l1.5 9h11l1.5-7H6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="10" cy="20" r="1" fill="currentColor"/>
+        <circle cx="18" cy="20" r="1" fill="currentColor"/>
+      </svg>
+      <span id="cart-count-badge" class="cart-count-badge" aria-hidden="true">0</span>
+    </button>
   </header>
 
   <main>
     <section class="products" aria-label="Каталог соков">
-      <!-- Товарные карточки: убедись, что картинки лежат в папке images/ -->
+      <!-- Карточки товаров -->
       <article class="product-card">
         <img src="images/tomato.jpg" alt="Томатный сок 1 л">
         <h3>Томатный сок</h3>
@@ -64,46 +75,82 @@
       </article>
 
       <article class="product-card">
-        <img src="images/multifruit.jpg" alt="Мультифруктов 1 л">
+        <img src="images/multifruit.jpg" alt="Мультифруктовый сок 1 л">
         <h3>Мультифрукт</h3>
         <p class="price">160 ₽</p>
         <button class="add-cart" data-id="multifruit" data-price="160">Добавить в корзину</button>
       </article>
-      
+
       <article class="product-card">
         <img src="images/kvass.jpg" alt="Квас 1 л">
         <h3>Квас (для любителей)</h3>
-        <p class="price">180 ₽</p>
+        <p class="price">80 ₽</p>
         <button class="add-cart" data-id="kvass" data-price="80">Добавить в корзину</button>
       </article>
     </section>
   </main>
 
-  <aside class="cart-area" aria-label="Корзина">
-    <details id="cart-dropdown">
-      <summary>Корзина (<span id="cart-count">0</span>)</summary>
+  <!-- Модальное окно корзины -->
+  <div id="cart-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+    <div class="modal-panel" role="document">
+      <header class="modal-header">
+        <h2 id="cart-title">Корзина</h2>
+        <button class="modal-close" id="close-cart" aria-label="Закрыть корзину">
+          <!-- крестик -->
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </header>
 
-      <div class="cart-body">
+      <div class="modal-body">
         <ul id="cart-items" class="cart-items" aria-live="polite"></ul>
-        <div class="cart-total">Общая сумма: <span id="cart-total">0</span> ₽</div>
-        <button id="checkout" class="primary">Оформить заказ</button>
+        <div class="cart-total">Итого: <span id="cart-total">0</span> ₽</div>
       </div>
-    </details>
-  </aside>
 
-  <!-- Форма оформления заказа (скрыта по умолчанию) -->
-  <div id="order-form" class="order-form hidden" aria-hidden="true">
-    <h2>Оформление заказа</h2>
-    <form id="checkout-form">
-      <label>Имя: <input name="firstName" type="text" required></label>
-      <label>Фамилия: <input name="lastName" type="text" required></label>
-      <label>Адрес доставки: <input name="address" type="text" required></label>
-      <label>Телефон: <input name="phone" type="tel" required></label>
-      <div class="form-actions">
-        <button type="submit" class="primary">Создать заказ</button>
-        <button type="button" id="cancel-order">Отмена</button>
+      <footer class="modal-footer">
+        <button id="checkout" class="primary">Оформить заказ</button>
+      </footer>
+    </div>
+    <div class="modal-backdrop" data-close="true"></div>
+  </div>
+
+  <!-- Модальное окно оформления заказа -->
+  <div id="order-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="order-title">
+    <div class="modal-panel order-panel" role="document">
+      <header class="modal-header">
+        <h2 id="order-title">Оформление заказа</h2>
+        <button class="modal-close" id="close-order" aria-label="Закрыть окно оформления">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </header>
+
+      <div class="modal-body">
+        <form id="checkout-form">
+          <label>Имя: <input name="firstName" type="text" required></label>
+          <label>Фамилия: <input name="lastName" type="text" required></label>
+          <label>Адрес доставки: <input name="address" type="text" required></label>
+          <label>Телефон: <input name="phone" type="tel" required></label>
+          <div class="form-actions">
+            <button type="submit" class="primary">Оформить</button>
+            <button type="button" id="cancel-order" class="muted">Отмена</button>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
+    <div class="modal-backdrop" data-close="true"></div>
+  </div>
+
+  <!-- Центр- модалка 'Заказ оформлен' -->
+  <div id="center-modal" class="center-modal hidden" role="dialog" aria-modal="true" aria-labelledby="center-title">
+    <div class="center-panel">
+      <button class="modal-close" id="close-center" aria-label="Закрыть сообщение">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="center-content">
+        <h3 id="center-title">Заказ оформлен</h3>
+        <p>Спасибо! Мы свяжемся с вами для подтверждения.</p>
+      </div>
+    </div>
+    <div class="modal-backdrop" data-close="true"></div>
   </div>
 
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>

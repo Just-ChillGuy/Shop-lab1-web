@@ -34,6 +34,7 @@ body {
 }
 
 /* кнопка корзины — фиксирована в верхнем правом углу */
+
 .cart-button {
     position: fixed;
     top: 16px;
@@ -49,8 +50,9 @@ body {
     box-shadow: 0 6px 16px rgba(0,0,0,0.08);
     border: none;
     cursor: pointer;
-    z-index: 2000; /* всегда поверх всего */
+    z-index: 1550; /* уменьшили ниже центр-модалки 1600 */
     color: var(--accent);
+}lor: var(--accent);
 }
 .cart-button svg {
     display: block;

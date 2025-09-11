@@ -1,37 +1,46 @@
-// script.js — логика корзины и формы заказа
+// script.js — корзина, модалки, localStorage
 document.addEventListener('DOMContentLoaded', () => {
 
   const STORAGE_KEY = 'shop_cart_v1';
 
-  // Получаем корзину из localStorage или пустую
-  function getCart() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    } catch {
-      return [];
-    }
-  }
+  // элементы
+  const cartButton = document.getElementById('cart-button');
+  const cartCountBadge = document.getElementById('cart-count-badge');
 
-  // Сохраняем корзину в localStorage
+  const cartModal = document.getElementById('cart-modal');
+  const closeCartBtn = document.getElementById('close-cart');
+  const cartItemsEl = document.getElementById('cart-items');
+  const cartTotalEl = document.getElementById('cart-total');
+  const checkoutBtn = document.getElementById('checkout');
+
+  const orderModal = document.getElementById('order-modal');
+  const closeOrderBtn = document.getElementById('close-order');
+  const orderForm = document.getElementById('checkout-form');
+  const cancelOrderBtn = document.getElementById('cancel-order');
+
+  const centerModal = document.getElementById('center-modal');
+  const closeCenterBtn = document.getElementById('close-center');
+
+  const toast = document.getElementById('toast');
+
+  // helpers: get/save cart
+  function getCart() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch { return []; }
+  }
   function saveCart(cart) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
   }
 
-  // Рендер корзины: список, количество и общая сумма
+  // update badge and render cart list
   function renderCart() {
     const cart = getCart();
-    const list = document.getElementById('cart-items');
-    const countEl = document.getElementById('cart-count');
-    const totalEl = document.getElementById('cart-total');
-
-    list.innerHTML = '';
+    cartItemsEl.innerHTML = '';
     let total = 0;
 
     cart.forEach(item => {
       total += item.price * item.qty;
-
       const li = document.createElement('li');
-      // внутренний HTML с контролами: минус, число, плюс, удалить
       li.innerHTML = `
         <div class="meta">
           <strong>${escapeHtml(item.name)}</strong>
@@ -41,25 +50,49 @@ document.addEventListener('DOMContentLoaded', () => {
           <button class="minus" data-id="${item.id}" aria-label="уменьшить">-</button>
           <span class="qty">${item.qty}</span>
           <button class="plus" data-id="${item.id}" aria-label="увеличить">+</button>
-          <div style="width:12px"></div>
+          <div style="width:8px"></div>
           <div>${(item.price * item.qty).toLocaleString()} ₽</div>
           <button class="remove" data-id="${item.id}" aria-label="удалить">×</button>
         </div>
       `;
-      list.appendChild(li);
+      cartItemsEl.appendChild(li);
     });
 
-    countEl.textContent = cart.reduce((s, it) => s + it.qty, 0);
-    totalEl.textContent = total.toLocaleString();
+    const count = cart.reduce((s, it) => s + it.qty, 0);
+    cartCountBadge.textContent = count;
+    cartTotalEl.textContent = total.toLocaleString();
   }
 
-  // Экранирование текста (необязательно, но безопасно)
+  // sanitize
   function escapeHtml(text) {
-    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    const map = { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' };
     return String(text).replace(/[&<>"']/g, m => map[m]);
   }
 
-  // Добавление в корзину (используем data-атрибуты)
+  // show/hide modals
+  function openModal(modal) {
+    modal.classList.remove('hidden');
+  }
+  function closeModal(modal) {
+    modal.classList.add('hidden');
+  }
+
+  // open cart modal
+  cartButton.addEventListener('click', () => {
+    renderCart();
+    openModal(cartModal);
+    // focus management: focus close button
+    closeCartBtn.focus();
+  });
+
+  // close cart
+  closeCartBtn.addEventListener('click', () => closeModal(cartModal));
+  // backdrop click for cart
+  cartModal.querySelectorAll('.modal-backdrop').forEach(b => {
+    b.addEventListener('click', () => closeModal(cartModal));
+  });
+
+  // add-to-cart buttons
   document.querySelectorAll('.add-cart').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.id;
@@ -68,19 +101,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const cart = getCart();
       const existing = cart.find(i => i.id === id);
-      if (existing) {
-        existing.qty += 1;
-      } else {
-        cart.push({ id, name, price, qty: 1 });
-      }
+      if (existing) existing.qty += 1;
+      else cart.push({ id, name, price, qty: 1 });
+
       saveCart(cart);
       renderCart();
       showToast('Товар добавлен в корзину');
     });
   });
 
-  // Делегирование кликов внутри корзины: +, -, удалить
-  document.getElementById('cart-items').addEventListener('click', (e) => {
+  // delegate cart item actions
+  cartItemsEl.addEventListener('click', (e) => {
     const id = e.target.dataset.id;
     if (!id) return;
     let cart = getCart();
@@ -88,8 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.classList.contains('remove')) {
       cart = cart.filter(i => i.id !== id);
     } else if (e.target.classList.contains('plus')) {
-      const it = cart.find(i => i.id === id);
-      if (it) it.qty += 1;
+      const it = cart.find(i => i.id === id); if (it) it.qty += 1;
     } else if (e.target.classList.contains('minus')) {
       const it = cart.find(i => i.id === id);
       if (it) {
@@ -101,42 +131,63 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCart();
   });
 
-  // Кнопка "Оформить заказ" — показать форму
-  document.getElementById('checkout').addEventListener('click', () => {
-    document.getElementById('order-form').classList.remove('hidden');
-    document.getElementById('order-form').setAttribute('aria-hidden', 'false');
+  // Checkout: open order modal under cart modal
+  checkoutBtn.addEventListener('click', () => {
+    // If cart empty, notify
+    const cart = getCart();
+    if (!cart.length) {
+      showToast('Корзина пуста');
+      return;
+    }
+    openModal(orderModal);
+    // focus first input
+    setTimeout(()=> orderForm.querySelector('input[name="firstName"]').focus(), 60);
   });
 
-  // Кнопка "Отмена" закрывает форму
-  document.getElementById('cancel-order').addEventListener('click', () => {
-    document.getElementById('order-form').classList.add('hidden');
-    document.getElementById('order-form').setAttribute('aria-hidden', 'true');
+  // close order modal
+  closeOrderBtn.addEventListener('click', () => closeModal(orderModal));
+  cancelOrderBtn.addEventListener('click', () => closeModal(orderModal));
+  orderModal.querySelectorAll('.modal-backdrop').forEach(b => {
+    b.addEventListener('click', () => closeModal(orderModal));
   });
 
-  // Обработка отправки формы: вывод сообщения и сброс корзины
-  document.getElementById('checkout-form').addEventListener('submit', function (e) {
+  // order submit: close cart and order modals, clear cart, show center modal
+  orderForm.addEventListener('submit', function(e) {
     e.preventDefault();
-
-    // Можно здесь собрать данные формы и показать подтверждение/сохранить куда-то
-    showToast('Заказ создан!');
-    localStorage.removeItem(STORAGE_KEY); // очищаем корзину
+    // optionally you can collect form data here
+    saveCart([]); // clear cart
     renderCart();
-    this.reset();
-    // скрываем форму
-    document.getElementById('order-form').classList.add('hidden');
-    document.getElementById('order-form').setAttribute('aria-hidden', 'true');
+    closeModal(orderModal);
+    closeModal(cartModal);
+    openModal(centerModal);
+    // focus close button
+    closeCenterBtn.focus();
   });
 
-  // Простой фидбек (тост)
-  const toastEl = document.getElementById('toast');
+  // close center modal
+  closeCenterBtn.addEventListener('click', () => closeModal(centerModal));
+  centerModal.querySelectorAll('.modal-backdrop').forEach(b => {
+    b.addEventListener('click', () => closeModal(centerModal));
+  });
+
+  // close cart with Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeModal(orderModal);
+      closeModal(cartModal);
+      closeModal(centerModal);
+    }
+  });
+
+  // simple toast
   let toastTimer = null;
-  function showToast(text, ms = 2000) {
-    toastEl.textContent = text;
-    toastEl.classList.remove('hidden');
+  function showToast(text, ms = 1800) {
+    toast.textContent = text;
+    toast.classList.remove('hidden');
     if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toastEl.classList.add('hidden'), ms);
+    toastTimer = setTimeout(() => toast.classList.add('hidden'), ms);
   }
 
-  // Начальная отрисовка, восстанавливаем корзину из localStorage
+  // initial render
   renderCart();
 });

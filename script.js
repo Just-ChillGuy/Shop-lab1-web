@@ -142,11 +142,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeModal(modal) { modal.classList.add('hidden'); }
 
     // open cart modal
-    cartButton.addEventListener('click', () => {
+    // toggle cart modal по клику на иконку корзины
+cartButton.addEventListener('click', () => {
+    if (cartModal.classList.contains('hidden')) {
         renderCart();
         openModal(cartModal);
         closeCartBtn.focus();
-    });
+    } else {
+        closeModal(cartModal);
+    }
+});
+
 
     // close cart
     closeCartBtn.addEventListener('click', () => closeModal(cartModal));

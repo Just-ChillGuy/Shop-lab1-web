@@ -32,6 +32,64 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
     }
 
+    // обновление отображения кнопки/контролов на карточке
+    function updateCardControls(id) {
+        const cart = getCart();
+        const card = document.querySelector(`.add-cart[data-id="${id}"]`)?.closest('.product-card');
+        if (!card) return;
+
+        const existing = cart.find(item => item.id === id);
+
+        // удаляем старые контролы, если есть
+        const oldControls = card.querySelector('.qty-controls');
+        if (oldControls) oldControls.remove();
+
+        const addBtn = card.querySelector('.add-cart');
+
+        if (existing && existing.qty > 0) {
+            // скрываем кнопку добавления
+            addBtn.style.display = 'none';
+
+            // создаём контролы количества
+            const controls = document.createElement('div');
+            controls.className = 'qty-controls';
+            controls.innerHTML = `
+                <button class="minus" aria-label="уменьшить">-</button>
+                <span class="qty">${existing.qty}</span>
+                <button class="plus" aria-label="увеличить">+</button>
+            `;
+            card.appendChild(controls);
+
+            // обработчики кнопок
+            controls.querySelector('.minus').addEventListener('click', () => {
+                if (existing.qty > 1) {
+                    existing.qty--;
+                    controls.querySelector('.qty').textContent = existing.qty;
+                    saveCart(cart);
+                    renderCart();
+                } else {
+                    // qty=1, после уменьшения удаляем из корзины
+                    const index = cart.findIndex(it => it.id === id);
+                    cart.splice(index, 1);
+                    saveCart(cart);
+                    renderCart();
+                    updateCardControls(id); // вернуть кнопку "Добавить в корзину"
+                }
+            });
+
+            controls.querySelector('.plus').addEventListener('click', () => {
+                existing.qty++;
+                controls.querySelector('.qty').textContent = existing.qty;
+                saveCart(cart);
+                renderCart();
+            });
+
+        } else {
+            // показываем кнопку добавления
+            addBtn.style.display = 'block';
+        }
+    }
+
     // update badge and render cart list
     function renderCart() {
         const cart = getCart();
@@ -60,6 +118,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const count = cart.reduce((s, it) => s + it.qty, 0);
         cartCountBadge.textContent = count;
         cartTotalEl.textContent = total.toLocaleString();
+
+        // обновляем контролы на карточках
+        document.querySelectorAll('.product-card').forEach(card => {
+            const id = card.querySelector('.add-cart')?.dataset.id;
+            if (id) updateCardControls(id);
+        });
     }
 
     // sanitize
@@ -69,12 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // show/hide modals
-    function openModal(modal) {
-        modal.classList.remove('hidden');
-    }
-    function closeModal(modal) {
-        modal.classList.add('hidden');
-    }
+    function openModal(modal) { modal.classList.remove('hidden'); }
+    function closeModal(modal) { modal.classList.add('hidden'); }
 
     // open cart modal
     cartButton.addEventListener('click', () => {

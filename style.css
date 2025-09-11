@@ -6,9 +6,8 @@
 }
 
 /* общие правила */
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
+
 body {
     margin: 0;
     font-family: Inter, Arial, sans-serif;
@@ -21,19 +20,20 @@ body {
     align-items: center;
 }
 
-/* заголовок */
+/* заголовок сайта */
 .site-header {
     width: 100%;
     max-width: 1100px;
     text-align: center;
     position: relative;
 }
+
 .site-header h1 {
     margin: 0;
     font-size: 1.6rem;
 }
 
-/* кнопка-иконка корзины — фиксирована в верхнем правом углу */
+/* кнопка-иконка корзины — поверх всего */
 .cart-button {
     position: fixed;
     top: 16px;
@@ -49,12 +49,14 @@ body {
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
     border: none;
     cursor: pointer;
-    z-index: 1500; /* выше остальных */
+    z-index: 2000; /* кнопка всегда поверх */
     color: var(--accent);
 }
+
 .cart-button svg {
     display: block;
 }
+
 .cart-count-badge {
     position: absolute;
     top: 6px;
@@ -79,6 +81,7 @@ body {
     gap: 18px;
     justify-content: center;
 }
+
 .product-card {
     width: 30%;
     min-width: 220px;
@@ -91,20 +94,24 @@ body {
     align-items: center;
     gap: 10px;
 }
+
 .product-card img {
     width: 100%;
     height: 160px;
     object-fit: cover;
     border-radius: 8px;
 }
+
 .product-card h3 {
     margin: 0;
     font-size: 1.05rem;
 }
+
 .product-card .price {
     font-weight: 700;
     color: var(--accent);
 }
+
 button {
     cursor: pointer;
     border: none;
@@ -114,6 +121,7 @@ button {
     border-radius: 8px;
     transition: transform 0.12s ease, opacity 0.12s;
 }
+
 button:hover {
     transform: translateY(-2px);
     opacity: 0.95;
@@ -126,11 +134,12 @@ button:hover {
     display: flex;
     align-items: flex-start;
     justify-content: flex-end;
+    z-index: 1400;
     pointer-events: none;
 }
-.modal.hidden {
-    display: none;
-}
+
+.modal.hidden { display: none; }
+
 .modal-panel {
     width: 380px;
     max-width: calc(100vw - 32px);
@@ -138,27 +147,19 @@ button:hover {
     margin-right: 18px;
     background: var(--card);
     border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
     overflow: hidden;
     pointer-events: auto;
     display: flex;
     flex-direction: column;
+    z-index: 1500; /* корзина над backdrop */
 }
 
-/* корзина поверх заказа */
-#cart-modal.modal-panel {
-    z-index: 1500;
-}
-
-/* модалка заказа под корзиной */
-#order-modal.modal-panel {
-    z-index: 1450;
-}
-
-/* order-panel шире */
+/* окно оформления заказа под корзиной */
 .order-panel {
     width: 420px;
     max-width: calc(100vw - 32px);
+    z-index: 1450; /* ниже корзины */
 }
 
 /* заголовок модалки */
@@ -169,10 +170,12 @@ button:hover {
     padding: 12px 14px;
     border-bottom: 1px solid #f1f5f9;
 }
+
 .modal-header h2 {
     margin: 0;
     font-size: 1.05rem;
 }
+
 .modal-close {
     background: transparent;
     border: none;
@@ -181,16 +184,12 @@ button:hover {
     padding: 6px;
     border-radius: 6px;
 }
-.modal-close:hover {
-    background: #f3f4f6;
-}
+
+.modal-close:hover { background: #f3f4f6; }
 
 /* тело модалки */
-.modal-body {
-    padding: 12px 14px;
-}
+.modal-body { padding: 12px 14px; }
 
-/* футер */
 .modal-footer {
     padding: 12px 14px;
     border-top: 1px solid #f1f5f9;
@@ -210,6 +209,7 @@ button:hover {
     max-height: 380px;
     overflow: auto;
 }
+
 .cart-items li {
     display: flex;
     justify-content: space-between;
@@ -220,20 +220,22 @@ button:hover {
     background: #fff;
     border: 1px solid #eef2ff;
 }
+
 .cart-items .meta {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
+
+/* убираем "₽ each" — теперь просто цена */
+.cart-items .meta .muted {
+    display: none;
+}
+
 .cart-items .controls {
     display: flex;
     gap: 8px;
     align-items: center;
-}
-
-/* убрать "each" */
-.cart-items .meta .muted {
-    display: none;
 }
 
 /* итог */
@@ -253,9 +255,9 @@ button:hover {
     z-index: 1600;
     pointer-events: none;
 }
-.center-modal.hidden {
-    display: none;
-}
+
+.center-modal.hidden { display: none; }
+
 .center-panel {
     width: min(520px, 92vw);
     background: var(--card);
@@ -266,29 +268,32 @@ button:hover {
     pointer-events: auto;
     text-align: center;
 }
+
 .center-panel .modal-close {
     position: absolute;
     right: 12px;
     top: 12px;
 }
+
 .center-content h3 {
     margin: 8px 0 6px;
 }
+
 .center-content p {
     margin: 0;
     color: var(--muted);
 }
 
-/* backdrop (полупрозрачный фон), кликабельный для закрытия */
+/* backdrop */
 .modal-backdrop {
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.22);
-    z-index: 1390;
+    z-index: 1390; /* ниже кнопки корзины */
     pointer-events: auto;
 }
 
-/* toast (маленькие уведомления) */
+/* toast */
 .toast {
     position: fixed;
     left: 50%;
@@ -300,48 +305,20 @@ button:hover {
     color: #fff;
     z-index: 1700;
 }
-.toast.hidden {
-    display: none;
-}
 
-/* форма оформления заказа: текст над input */
-#checkout-form label {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 12px;
-    font-weight: 500;
-}
-#checkout-form input {
-    margin-top: 4px;
-    padding: 8px 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 1rem;
-}
+.toast.hidden { display: none; }
 
 /* адаптив */
 @media (max-width: 1024px) {
-    .product-card {
-        width: 48%;
-    }
+    .product-card { width: 48%; }
 }
+
 @media (max-width: 600px) {
-    body {
-        padding: 12px;
-    }
-    .product-card {
-        width: 100%;
-    }
-    .product-card img {
-        height: 140px;
-    }
-    /* делаем модалки шире/центрированными на маленьких экранах */
-    .modal {
-        align-items: flex-end;
-        justify-content: flex-end;
-    }
-    .modal-panel, .order-panel {
-        width: 92vw;
-        margin: 12px;
-    }
+    body { padding: 12px; }
+    .product-card { width: 100%; }
+    .product-card img { height: 140px; }
+
+    /* модалки шире/центрированы на маленьких экранах */
+    .modal { align-items: flex-end; justify-content: flex-end; }
+    .modal-panel, .order-panel { width: 92vw; margin: 12px; }
 }

@@ -1,66 +1,105 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Интернет-магазин соков</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Интернет-магазин соков — 1 л</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Магазин соков</h1>
+  <header class="site-header">
+    <h1>Магазин соков (1 л)</h1>
   </header>
 
   <main>
-    <section class="products">
+    <section class="products" aria-label="Каталог соков">
+      <!-- Товарные карточки: убедись, что картинки лежат в папке images/ -->
       <article class="product-card">
-        <img src="tomato.jpg" alt="Томатный сок 1 л">
+        <img src="images/tomato.jpg" alt="Томатный сок 1 л">
         <h3>Томатный сок</h3>
-        <p>Цена: 100 ₽</p>
-        <button class="add-cart" data-id="tomato">Добавить в корзину</button>
+        <p class="price">100 ₽</p>
+        <button class="add-cart" data-id="tomato" data-price="100">Добавить в корзину</button>
       </article>
 
       <article class="product-card">
-        <img src="orange.jpg" alt="Апельсиновый сок 1 л">
+        <img src="images/orange.jpg" alt="Апельсиновый сок 1 л">
         <h3>Апельсиновый сок</h3>
-        <p>Цена: 120 ₽</p>
-        <button class="add-cart" data-id="orange">Добавить в корзину</button>
+        <p class="price">120 ₽</p>
+        <button class="add-cart" data-id="orange" data-price="120">Добавить в корзину</button>
       </article>
 
       <article class="product-card">
-        <img src="apple.jpg" alt="Яблочный сок 1 л">
+        <img src="images/apple.jpg" alt="Яблочный сок 1 л">
         <h3>Яблочный сок</h3>
-        <p>Цена: 90 ₽</p>
-        <button class="add-cart" data-id="apple">Добавить в корзину</button>
+        <p class="price">90 ₽</p>
+        <button class="add-cart" data-id="apple" data-price="90">Добавить в корзину</button>
       </article>
 
       <article class="product-card">
-        <img src="grape.jpg" alt="Виноградный сок 1 л">
+        <img src="images/grape.jpg" alt="Виноградный сок 1 л">
         <h3>Виноградный сок</h3>
-        <p>Цена: 110 ₽</p>
-        <button class="add-cart" data-id="grape">Добавить в корзину</button>
+        <p class="price">110 ₽</p>
+        <button class="add-cart" data-id="grape" data-price="110">Добавить в корзину</button>
+      </article>
+
+      <article class="product-card">
+        <img src="images/cherry.jpg" alt="Вишнёвый сок 1 л">
+        <h3>Вишнёвый сок</h3>
+        <p class="price">130 ₽</p>
+        <button class="add-cart" data-id="cherry" data-price="130">Добавить в корзину</button>
+      </article>
+
+      <article class="product-card">
+        <img src="images/pineapple.jpg" alt="Ананасовый сок 1 л">
+        <h3>Ананасовый сок</h3>
+        <p class="price">140 ₽</p>
+        <button class="add-cart" data-id="pineapple" data-price="140">Добавить в корзину</button>
+      </article>
+
+      <article class="product-card">
+        <img src="images/mango.jpg" alt="Манговый сок 1 л">
+        <h3>Манговый сок</h3>
+        <p class="price">150 ₽</p>
+        <button class="add-cart" data-id="mango" data-price="150">Добавить в корзину</button>
+      </article>
+
+      <article class="product-card">
+        <img src="images/kvass.jpg" alt="Квас 1 л">
+        <h3>Квас (для любителей)</h3>
+        <p class="price">80 ₽</p>
+        <button class="add-cart" data-id="kvass" data-price="80">Добавить в корзину</button>
       </article>
     </section>
   </main>
 
-  <aside>
+  <aside class="cart-area" aria-label="Корзина">
     <details id="cart-dropdown">
       <summary>Корзина (<span id="cart-count">0</span>)</summary>
-      <ul id="cart-items"></ul>
-      <div class="cart-total">Общая сумма: 0 ₽</div>
-      <button id="checkout">Оформить заказ</button>
+
+      <div class="cart-body">
+        <ul id="cart-items" class="cart-items" aria-live="polite"></ul>
+        <div class="cart-total">Общая сумма: <span id="cart-total">0</span> ₽</div>
+        <button id="checkout" class="primary">Оформить заказ</button>
+      </div>
     </details>
   </aside>
 
-  <div id="order-form" style="display:none;">
+  <!-- Форма оформления заказа (скрыта по умолчанию) -->
+  <div id="order-form" class="order-form hidden" aria-hidden="true">
     <h2>Оформление заказа</h2>
-    <form>
-      <label>Имя: <input type="text" required></label><br>
-      <label>Фамилия: <input type="text" required></label><br>
-      <label>Адрес: <input type="text" required></label><br>
-      <label>Телефон: <input type="tel" required></label><br>
-      <button type="submit">Создать заказ</button>
+    <form id="checkout-form">
+      <label>Имя: <input name="firstName" type="text" required></label>
+      <label>Фамилия: <input name="lastName" type="text" required></label>
+      <label>Адрес доставки: <input name="address" type="text" required></label>
+      <label>Телефон: <input name="phone" type="tel" required></label>
+      <div class="form-actions">
+        <button type="submit" class="primary">Создать заказ</button>
+        <button type="button" id="cancel-order">Отмена</button>
+      </div>
     </form>
   </div>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
   <script src="script.js"></script>
 </body>

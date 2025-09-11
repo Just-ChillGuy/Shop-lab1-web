@@ -91,23 +91,25 @@
     </section>
   </main>
 
-  <!-- Модальное окно корзины -->
-  <div id="cart-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cart-title">
-    <div class="modal-panel" role="document">
-      <header class="modal-header">
-        <h2 id="cart-title">Корзина</h2>
-        <button class="modal-close" id="close-cart" aria-label="Закрыть корзину">×</button>
-      </header>
-      <div class="modal-body">
-        <ul id="cart-items" class="cart-items" aria-live="polite"></ul>
-        <div class="cart-total">Итого: <span id="cart-total">0</span> ₽</div>
-      </div>
-      <footer class="modal-footer">
-        <button id="checkout" class="primary">Оформить заказ</button>
-      </footer>
+ <!-- Модальное окно корзины -->
+<div id="cart-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+  <div class="modal-panel" role="document">
+    <header class="modal-header">
+      <h2 id="cart-title">Корзина</h2>
+      <button class="modal-close" id="close-cart" aria-label="Закрыть корзину">×</button>
+    </header>
+    <div class="modal-body">
+      <ul id="cart-items" class="cart-items" aria-live="polite"></ul>
+      <div class="cart-total">Итого: <span id="cart-total">0</span> ₽</div>
     </div>
-    <div class="modal-backdrop" data-close="true"></div>
+    <footer class="modal-footer">
+      <!-- Новый крестик снизу слева -->
+      <button class="modal-close footer-close" id="close-cart-footer" aria-label="Закрыть корзину">× Закрыть</button>
+      <button id="checkout" class="primary">Оформить заказ</button>
+    </footer>
   </div>
+  <div class="modal-backdrop" data-close="true"></div>
+</div>
 
   <!-- Модальное окно оформления заказа -->
   <div id="order-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="order-title">

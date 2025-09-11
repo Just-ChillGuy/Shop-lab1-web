@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
       li.innerHTML = `
         <div class="meta">
           <strong>${escapeHtml(item.name)}</strong>
-          <div class="muted">${item.price} ₽ each</div>
+          <!-- <div class="muted">${item.price} ₽ each</div> --> 
         </div>
         <div class="controls">
           <button class="minus" data-id="${item.id}" aria-label="уменьшить">-</button>

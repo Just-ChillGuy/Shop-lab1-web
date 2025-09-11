@@ -260,6 +260,19 @@ cartButton.addEventListener('click', () => {
         if (toastTimer) clearTimeout(toastTimer);
         toastTimer = setTimeout(() => toast.classList.add('hidden'), ms);
     }
+    const phoneInput = document.querySelector('input[name="phone"]');
+
+phoneInput.addEventListener('input', () => {
+  // Разрешаем только цифры и один "+" в начале
+  let val = phoneInput.value.replace(/[^\d+]/g, '');
+  if (val.startsWith('+')) {
+    val = '+' + val.slice(1).replace(/\+/g, ''); 
+  } else {
+    val = val.replace(/\+/g, ''); // убираем все "+"
+  }
+  phoneInput.value = val;
+});
+
 
     // initial render
     renderCart();

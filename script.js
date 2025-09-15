@@ -261,15 +261,40 @@ cartButton.addEventListener('click', () => {
     }
     const phoneInput = document.querySelector('input[name="phone"]');
 
-phoneInput.addEventListener('input', () => {
-  let val = phoneInput.value.replace(/[^\d+]/g, '');
-  if (val.startsWith('+')) {
-    val = '+' + val.slice(1).replace(/\+/g, ''); 
-  } else {
-    val = val.replace(/\+/g, ''); 
-  }
-  phoneInput.value = val;
-});
+if (phoneInput) {
+  phoneInput.addEventListener('input', () => {
+    let val = phoneInput.value.replace(/[^\d+]/g, '');
+    if (val.startsWith('+')) {
+      val = '+' + val.slice(1).replace(/\+/g, '');
+    } else {
+      val = val.replace(/\+/g, '');
+    }
+
+
+    let digits = val.replace(/\D/g, '');
+    
+    if (digits.length > 15) {
+      digits = digits.slice(0, 15);
+    }
+
+    if (val.startsWith('+')) {
+      val = '+' + digits;
+    } else {
+      val = digits;
+    }
+
+    phoneInput.value = val;
+  });
+
+
+  phoneInput.addEventListener('blur', () => {
+    const digits = phoneInput.value.replace(/\D/g, '');
+    if (digits.length < 10) {
+      alert('Введите номер не короче 10 цифр');
+      phoneInput.focus();
+    }
+  });
+}
 
 
     // initial render

@@ -260,6 +260,7 @@ cartButton.addEventListener('click', () => {
         toastTimer = setTimeout(() => toast.classList.add('hidden'), ms);
     }
     const phoneInput = document.querySelector('input[name="phone"]');
+const phoneError = document.getElementById('phone-error');
 
 if (phoneInput) {
   phoneInput.addEventListener('input', () => {
@@ -270,33 +271,23 @@ if (phoneInput) {
       val = val.replace(/\+/g, '');
     }
 
-
     let digits = val.replace(/\D/g, '');
-    
+
     if (digits.length > 15) {
       digits = digits.slice(0, 15);
     }
 
-    if (val.startsWith('+')) {
-      val = '+' + digits;
+    phoneInput.value = val.startsWith('+') ? '+' + digits : digits;
+
+    if (digits.length > 0 && digits.length < 10) {
+      phoneError.textContent = 'Введите не менее 10 цифр';
     } else {
-      val = digits;
-    }
-
-    phoneInput.value = val;
-  });
-
-
-  phoneInput.addEventListener('blur', () => {
-    const digits = phoneInput.value.replace(/\D/g, '');
-    if (digits.length < 10) {
-      alert('Введите номер не короче 10 цифр');
-      phoneInput.focus();
+      phoneError.textContent = '';
     }
   });
 }
 
 
-    // initial render
+
     renderCart();
 });

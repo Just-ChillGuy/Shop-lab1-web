@@ -10,7 +10,7 @@
   <header class="site-header">
     <h1>Магазин соков</h1>
 
-    <!-- Кнопка-иконка корзины -->
+  
     <button id="cart-button" class="cart-button" aria-label="Открыть корзину" title="Корзина">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M3 3h2l1.5 9h11l1.5-7H6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -24,7 +24,7 @@
   <main>
     <section class="products" aria-label="Каталог соков">
 
-      <!-- Карточки товаров -->
+   
       <article class="product-card">
         <img src="tomato.jpg" alt="Томатный сок 1 л">
         <h3>Томатный сок</h3>
@@ -91,7 +91,7 @@
     </section>
   </main>
 
- <!-- Модальное окно корзины -->
+ 
 <div id="cart-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cart-title">
   <div class="modal-panel" role="document">
     <header class="modal-header">
@@ -103,7 +103,7 @@
       <div class="cart-total">Итого: <span id="cart-total">0</span> ₽</div>
     </div>
     <footer class="modal-footer">
-      <!-- Новый крестик снизу слева -->
+   
       <button class="modal-close footer-close" id="close-cart-footer" aria-label="Закрыть корзину">Закрыть</button>
       <button id="checkout" class="primary">Оформить заказ</button>
     </footer>
@@ -111,7 +111,6 @@
   <div class="modal-backdrop" data-close="true"></div>
 </div>
 
-  <!-- Модальное окно оформления заказа -->
   <div id="order-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="order-title">
     <div class="modal-panel order-panel" role="document">
       <header class="modal-header">
@@ -134,7 +133,6 @@
     <div class="modal-backdrop" data-close="true"></div>
   </div>
 
-  <!-- Центр-модалка "Заказ оформлен" без серого фона -->
   <div id="center-modal" class="center-modal hidden" role="dialog" aria-modal="true" aria-labelledby="center-title">
     <div class="center-panel">
       <button class="modal-close" id="close-center" aria-label="Закрыть сообщение">×</button>
@@ -145,7 +143,6 @@
     </div>
   </div>
 
-  <!-- Toast уведомление -->
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
   <script src="script.js"></script>

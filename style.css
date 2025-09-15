@@ -339,4 +339,10 @@ button:hover {
 .modal-footer .footer-close:hover {
     background: #f3f4f6;
 }
+.error-msg {
+  color: red;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
 

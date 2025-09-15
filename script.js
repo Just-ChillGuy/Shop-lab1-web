@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const STORAGE_KEY = 'shop_cart_v1';
 
-    // элементы
+
     const cartButton = document.getElementById('cart-button');
     const cartCountBadge = document.getElementById('cart-count-badge');
     const cartModal = document.getElementById('cart-modal');
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const toast = document.getElementById('toast');
 
-    // helpers: get/save cart
+    
     function getCart() {
         try {
             return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
     }
 
-    // обновление отображения кнопки/контролов на карточке
+    
     function updateCardControls(id) {
         const cart = getCart();
         const card = document.querySelector(`.add-cart[data-id="${id}"]`)?.closest('.product-card');
@@ -52,10 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const addBtn = card.querySelector('.add-cart');
 
         if (existing && existing.qty > 0) {
-            // скрываем кнопку добавления
+            
             addBtn.style.display = 'none';
 
-            // создаём контролы количества
+           
             const controls = document.createElement('div');
             controls.className = 'qty-controls';
             controls.innerHTML = `
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             card.appendChild(controls);
 
-            // обработчики кнопок
+            
             controls.querySelector('.minus').addEventListener('click', () => {
                 if (existing.qty > 1) {
                     existing.qty--;
@@ -73,12 +73,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     saveCart(cart);
                     renderCart();
                 } else {
-                    // qty=1, после уменьшения удаляем из корзины
+                    
                     const index = cart.findIndex(it => it.id === id);
                     cart.splice(index, 1);
                     saveCart(cart);
                     renderCart();
-                    updateCardControls(id); // вернуть кнопку "Добавить в корзину"
+                    updateCardControls(id); 
                 }
             });
 
@@ -90,12 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
         } else {
-            // показываем кнопку добавления
+            
             addBtn.style.display = 'block';
         }
     }
 
-    // update badge and render cart list
+    
     function renderCart() {
         const cart = getCart();
         cartItemsEl.innerHTML = '';
@@ -124,25 +124,24 @@ document.addEventListener('DOMContentLoaded', () => {
         cartCountBadge.textContent = count;
         cartTotalEl.textContent = total.toLocaleString();
 
-        // обновляем контролы на карточках
+       
         document.querySelectorAll('.product-card').forEach(card => {
             const id = card.querySelector('.add-cart')?.dataset.id;
             if (id) updateCardControls(id);
         });
     }
 
-    // sanitize
+   
     function escapeHtml(text) {
         const map = { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' };
         return String(text).replace(/[&<>"']/g, m => map[m]);
     }
 
-    // show/hide modals
+    
     function openModal(modal) { modal.classList.remove('hidden'); }
     function closeModal(modal) { modal.classList.add('hidden'); }
 
-    // open cart modal
-    // toggle cart modal по клику на иконку корзины
+    
 cartButton.addEventListener('click', () => {
     if (cartModal.classList.contains('hidden')) {
         renderCart();
@@ -154,13 +153,13 @@ cartButton.addEventListener('click', () => {
 });
 
 
-    // close cart
+    
     closeCartBtn.addEventListener('click', () => closeModal(cartModal));
     cartModal.querySelectorAll('.modal-backdrop').forEach(b => {
         b.addEventListener('click', () => closeModal(cartModal));
     });
 
-    // add-to-cart buttons
+    
     document.querySelectorAll('.add-cart').forEach(btn => {
         btn.addEventListener('click', () => {
             const id = btn.dataset.id;
@@ -176,7 +175,7 @@ cartButton.addEventListener('click', () => {
         });
     });
 
-    // delegate cart item actions
+    
     cartItemsEl.addEventListener('click', (e) => {
         const id = e.target.dataset.id;
         if (!id) return;
@@ -197,7 +196,7 @@ cartButton.addEventListener('click', () => {
         renderCart();
     });
 
-    // Checkout: open order modal under cart modal
+  
     checkoutBtn.addEventListener('click', () => {
         const cart = getCart();
         if (!cart.length) {
@@ -208,26 +207,26 @@ cartButton.addEventListener('click', () => {
         setTimeout(() => orderForm.querySelector('input[name="firstName"]').focus(), 60);
     });
 
-    // close order modal
+  
     closeOrderBtn.addEventListener('click', () => closeModal(orderModal));
     cancelOrderBtn.addEventListener('click', () => closeModal(orderModal));
     orderModal.querySelectorAll('.modal-backdrop').forEach(b => {
         b.addEventListener('click', () => closeModal(orderModal));
     });
 
-    // Open/Close center modal and hide/show cart button
+    
     function openCenterModal() {
         centerModal.classList.remove('hidden');
-        cartButton.style.display = 'none'; // скрываем кнопку корзины
+        cartButton.style.display = 'none'; 
         closeCenterBtn.focus();
     }
 
     function closeCenterModal() {
         centerModal.classList.add('hidden');
-        cartButton.style.display = 'flex'; // показываем кнопку обратно
+        cartButton.style.display = 'flex'; 
     }
 
-    // order submit: close cart and order, clear cart, show center modal
+    
     orderForm.addEventListener('submit', function(e) {
         e.preventDefault();
         saveCart([]);
@@ -237,13 +236,13 @@ cartButton.addEventListener('click', () => {
         openCenterModal();
     });
 
-    // close center modal
+    
     closeCenterBtn.addEventListener('click', () => closeCenterModal());
     centerModal.querySelectorAll('.modal-backdrop').forEach(b => {
         b.addEventListener('click', () => closeCenterModal());
     });
 
-    // close all modals with Escape
+    
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeModal(orderModal);
@@ -252,7 +251,7 @@ cartButton.addEventListener('click', () => {
         }
     });
 
-    // simple toast
+   
     let toastTimer = null;
     function showToast(text, ms = 1800) {
         toast.textContent = text;
@@ -263,12 +262,11 @@ cartButton.addEventListener('click', () => {
     const phoneInput = document.querySelector('input[name="phone"]');
 
 phoneInput.addEventListener('input', () => {
-  // Разрешаем только цифры и один "+" в начале
   let val = phoneInput.value.replace(/[^\d+]/g, '');
   if (val.startsWith('+')) {
     val = '+' + val.slice(1).replace(/\+/g, ''); 
   } else {
-    val = val.replace(/\+/g, ''); // убираем все "+"
+    val = val.replace(/\+/g, ''); 
   }
   phoneInput.value = val;
 });

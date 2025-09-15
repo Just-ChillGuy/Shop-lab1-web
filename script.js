@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cartModal = document.getElementById('cart-modal');
     const closeCartBtn = document.getElementById('close-cart');
     const closeCartFooterBtn = document.getElementById('close-cart-footer');
-    if (closeCartFooterBtn) {  // вот эта проверка нужна, чтобы не ломать скрипт
+    if (closeCartFooterBtn) {  
         closeCartFooterBtn.addEventListener('click', () => closeModal(cartModal));
     }
 
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const existing = cart.find(item => item.id === id);
 
-        // удаляем старые контролы, если есть
+
         const oldControls = card.querySelector('.qty-controls');
         if (oldControls) oldControls.remove();
 

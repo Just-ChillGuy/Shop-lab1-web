@@ -1,293 +1,265 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const STORAGE_KEY = 'shop_cart_v1';
 
+  const SKEY = 'ct_cart_v2';
 
-    const cartButton = document.getElementById('cart-button');
-    const cartCountBadge = document.getElementById('cart-count-badge');
-    const cartModal = document.getElementById('cart-modal');
-    const closeCartBtn = document.getElementById('close-cart');
-    const closeCartFooterBtn = document.getElementById('close-cart-footer');
-    if (closeCartFooterBtn) {  
-        closeCartFooterBtn.addEventListener('click', () => closeModal(cartModal));
+  // элементы на странице (короткие имена)
+  const btnCart = document.getElementById('btnCart');    // кнопка корзины (верхняя)
+  const cnt = document.getElementById('cnt');            // бейдж количества
+  const cartBox = document.getElementById('cartBox');    // модал корзины
+  const list = document.getElementById('list');          // UL с товарами в корзине
+  const sumEl = document.getElementById('sum');          // итоговая сумма
+  const btnCloseCart = document.getElementById('btnCloseCart'); // закрыть корзину
+  const btnCheckout = document.getElementById('btnCheckout');  // оформить заказ
+
+  const orderBox = document.getElementById('orderBox');  // модал оформления
+  const orderForm = document.getElementById('orderForm');//
+  const phone = document.getElementById('phone');        // поле телефона
+  const phErr = document.getElementById('phErr');       // сообщение об ошибке
+  const cancel = document.getElementById('cancel');     // отмена оформления
+
+  const doneBox = document.getElementById('doneBox');   // модал "Заказ создан"
+  const doneClose = document.getElementById('doneClose');
+
+  const toast = document.getElementById('toast');
+
+  // --- helpers: загрузка/сохранение корзины ---
+  function loadCart() {
+    try {
+      return JSON.parse(localStorage.getItem(SKEY) || '[]');
+    } catch (e) {
+      return [];
     }
+  }
+  function saveCart(arr) {
+    localStorage.setItem(SKEY, JSON.stringify(arr));
+  }
 
-    const cartItemsEl = document.getElementById('cart-items');
-    const cartTotalEl = document.getElementById('cart-total');
+  // --- показать быстрый тост ---
+  let _tTimer = null;
+  function showToast(txt, ms = 1400) {
+    toast.textContent = txt;
+    toast.classList.remove('hidden');
+    if (_tTimer) clearTimeout(_tTimer);
+    _tTimer = setTimeout(() => toast.classList.add('hidden'), ms);
+  }
 
-    const checkoutBtn = document.getElementById('checkout');
-    const orderModal = document.getElementById('order-modal');
-    const closeOrderBtn = document.getElementById('close-order');
-    const orderForm = document.getElementById('checkout-form');
-    const cancelOrderBtn = document.getElementById('cancel-order');
+  // --- простая экранизация текста для безопасности вывода ---
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c]));
+  }
 
-    const centerModal = document.getElementById('center-modal');
-    const closeCenterBtn = document.getElementById('close-center');
+  // --- перерисовать состояние корзины (DOM и итого) ---
+  function redraw() {
+    const cart = loadCart();
+    list.innerHTML = ''; // очистка списка
+    let total = 0;
 
-    const toast = document.getElementById('toast');
-
-    
-    function getCart() {
-        try {
-            return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        } catch {
-            return [];
-        }
-    }
-    function saveCart(cart) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
-    }
-
-    
-    function updateCardControls(id) {
-        const cart = getCart();
-        const card = document.querySelector(`.add-cart[data-id="${id}"]`)?.closest('.product-card');
-        if (!card) return;
-
-        const existing = cart.find(item => item.id === id);
-
-
-        const oldControls = card.querySelector('.qty-controls');
-        if (oldControls) oldControls.remove();
-
-        const addBtn = card.querySelector('.add-cart');
-
-        if (existing && existing.qty > 0) {
-            
-            addBtn.style.display = 'none';
-
-           
-            const controls = document.createElement('div');
-            controls.className = 'qty-controls';
-            controls.innerHTML = `
-                <button class="minus" aria-label="уменьшить">-</button>
-                <span class="qty">${existing.qty}</span>
-                <button class="plus" aria-label="увеличить">+</button>
-            `;
-            card.appendChild(controls);
-
-            
-            controls.querySelector('.minus').addEventListener('click', () => {
-                if (existing.qty > 1) {
-                    existing.qty--;
-                    controls.querySelector('.qty').textContent = existing.qty;
-                    saveCart(cart);
-                    renderCart();
-                } else {
-                    
-                    const index = cart.findIndex(it => it.id === id);
-                    cart.splice(index, 1);
-                    saveCart(cart);
-                    renderCart();
-                    updateCardControls(id); 
-                }
-            });
-
-            controls.querySelector('.plus').addEventListener('click', () => {
-                existing.qty++;
-                controls.querySelector('.qty').textContent = existing.qty;
-                saveCart(cart);
-                renderCart();
-            });
-
-        } else {
-            
-            addBtn.style.display = 'block';
-        }
-    }
-
-    
-    function renderCart() {
-        const cart = getCart();
-        cartItemsEl.innerHTML = '';
-        let total = 0;
-
-        cart.forEach(item => {
-            total += item.price * item.qty;
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <div class="meta">
-                    <strong>${escapeHtml(item.name)}</strong>
-                </div>
-                <div class="controls">
-                    <button class="minus" data-id="${item.id}" aria-label="уменьшить">-</button>
-                    <span class="qty">${item.qty}</span>
-                    <button class="plus" data-id="${item.id}" aria-label="увеличить">+</button>
-                    <div style="width:8px"></div>
-                    <div>${(item.price * item.qty).toLocaleString()} ₽</div>
-                    <button class="remove" data-id="${item.id}" aria-label="удалить">×</button>
-                </div>
-            `;
-            cartItemsEl.appendChild(li);
-        });
-
-        const count = cart.reduce((s, it) => s + it.qty, 0);
-        cartCountBadge.textContent = count;
-        cartTotalEl.textContent = total.toLocaleString();
-
-       
-        document.querySelectorAll('.product-card').forEach(card => {
-            const id = card.querySelector('.add-cart')?.dataset.id;
-            if (id) updateCardControls(id);
-        });
-    }
-
-   
-    function escapeHtml(text) {
-        const map = { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' };
-        return String(text).replace(/[&<>"']/g, m => map[m]);
-    }
-
-    
-    function openModal(modal) { modal.classList.remove('hidden'); }
-    function closeModal(modal) { modal.classList.add('hidden'); }
-
-    
-cartButton.addEventListener('click', () => {
-    if (cartModal.classList.contains('hidden')) {
-        renderCart();
-        openModal(cartModal);
-        closeCartBtn.focus();
-    } else {
-        closeModal(cartModal);
-    }
-});
-
-
-    
-    closeCartBtn.addEventListener('click', () => closeModal(cartModal));
-    cartModal.querySelectorAll('.modal-backdrop').forEach(b => {
-        b.addEventListener('click', () => closeModal(cartModal));
+    // каждый элемент — li со своими контролами (делаем HTML через шаблон)
+    cart.forEach(item => {
+      total += item.p * item.q;
+      const li = document.createElement('li');
+      li.dataset.sku = item.s; // для делегирования
+      li.innerHTML = `
+        <div class="meta">
+          <strong>${esc(item.n)}</strong>
+        </div>
+        <div class="right">
+          <button class="minus" data-s="${item.s}" aria-label="minus">-</button>
+          <span class="qty">${item.q}</span>
+          <button class="plus" data-s="${item.s}" aria-label="plus">+</button>
+          <span style="width:10px"></span>
+          <span class="line-sum">${(item.p * item.q).toLocaleString()}</span> ₽
+          <button class="rm" data-s="${item.s}" aria-label="rm">×</button>
+        </div>
+      `;
+      list.appendChild(li);
     });
 
-    
-    document.querySelectorAll('.add-cart').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const id = btn.dataset.id;
-            const price = Number(btn.dataset.price) || 0;
-            const name = btn.closest('.product-card').querySelector('h3').textContent.trim();
-            const cart = getCart();
-            const existing = cart.find(i => i.id === id);
-            if (existing) existing.qty += 1;
-            else cart.push({ id, name, price, qty: 1 });
-            saveCart(cart);
-            renderCart();
-            showToast('Товар добавлен в корзину');
-        });
-    });
+    // бейдж общего количества
+    const count = cart.reduce((acc, it) => acc + it.q, 0);
+    cnt.textContent = count;
+    sumEl.textContent = total.toLocaleString();
 
-    
-    cartItemsEl.addEventListener('click', (e) => {
-        const id = e.target.dataset.id;
-        if (!id) return;
-        let cart = getCart();
-        if (e.target.classList.contains('remove')) {
-            cart = cart.filter(i => i.id !== id);
-        } else if (e.target.classList.contains('plus')) {
-            const it = cart.find(i => i.id === id);
-            if (it) it.qty += 1;
-        } else if (e.target.classList.contains('minus')) {
-            const it = cart.find(i => i.id === id);
-            if (it) {
-                it.qty -= 1;
-                if (it.qty <= 0) cart = cart.filter(i => i.id !== id);
-            }
+    // обновить контролы на карточках (покажем qty на карточках)
+    document.querySelectorAll('.card').forEach(card => {
+      const sku = card.dataset.sku;
+      syncCardControls(sku);
+    });
+  }
+
+  // --- синхронизировать контролы (кол-во) на карточке товара ---
+  function syncCardControls(sku) {
+    const cart = loadCart();
+    const card = document.querySelector(`.card[data-sku="${sku}"]`);
+    if (!card) return;
+    const bag = cart.find(i => i.s === sku);
+
+    // удалим старый блок, если есть
+    const old = card.querySelector('.qty-wrap');
+    if (old) old.remove();
+
+    const btn = card.querySelector('.toCart');
+    if (bag && bag.q > 0) {
+      // спрячем кнопку и вставим контролы
+      btn.style.display = 'none';
+      const wrap = document.createElement('div');
+      wrap.className = 'qty-wrap';
+      wrap.innerHTML = `<button class="c-minus">-</button><span class="c-q">${bag.q}</span><button class="c-plus">+</button>`;
+      card.querySelector('.card-actions').appendChild(wrap);
+
+      // события для плюс/минус на карточке
+      wrap.querySelector('.c-plus').addEventListener('click', () => {
+        bag.q += 1;
+        saveCart(cart);
+        redraw();
+      });
+      wrap.querySelector('.c-minus').addEventListener('click', () => {
+        bag.q -= 1;
+        if (bag.q <= 0) {
+          const idx = cart.findIndex(x => x.s === sku);
+          cart.splice(idx,1);
         }
         saveCart(cart);
-        renderCart();
-    });
-
-  
-    checkoutBtn.addEventListener('click', () => {
-        const cart = getCart();
-        if (!cart.length) {
-            showToast('Корзина пуста');
-            return;
-        }
-        openModal(orderModal);
-        setTimeout(() => orderForm.querySelector('input[name="firstName"]').focus(), 60);
-    });
-
-  
-    closeOrderBtn.addEventListener('click', () => closeModal(orderModal));
-    cancelOrderBtn.addEventListener('click', () => closeModal(orderModal));
-    orderModal.querySelectorAll('.modal-backdrop').forEach(b => {
-        b.addEventListener('click', () => closeModal(orderModal));
-    });
-
-    
-    function openCenterModal() {
-        centerModal.classList.remove('hidden');
-        cartButton.style.display = 'none'; 
-        closeCenterBtn.focus();
-    }
-
-    function closeCenterModal() {
-        centerModal.classList.add('hidden');
-        cartButton.style.display = 'flex'; 
-    }
-
-    
-    orderForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        saveCart([]);
-        renderCart();
-        closeModal(orderModal);
-        closeModal(cartModal);
-        openCenterModal();
-    });
-
-    
-    closeCenterBtn.addEventListener('click', () => closeCenterModal());
-    centerModal.querySelectorAll('.modal-backdrop').forEach(b => {
-        b.addEventListener('click', () => closeCenterModal());
-    });
-
-    
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            closeModal(orderModal);
-            closeModal(cartModal);
-            closeCenterModal();
-        }
-    });
-
-   
-    let toastTimer = null;
-    function showToast(text, ms = 1800) {
-        toast.textContent = text;
-        toast.classList.remove('hidden');
-        if (toastTimer) clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toast.classList.add('hidden'), ms);
-    }
-    const phoneInput = document.querySelector('input[name="phone"]');
-const phoneError = document.getElementById('phone-error');
-
-if (phoneInput) {
-  phoneInput.addEventListener('input', () => {
-    let val = phoneInput.value.replace(/[^\d+]/g, '');
-    if (val.startsWith('+')) {
-      val = '+' + val.slice(1).replace(/\+/g, '');
+        redraw();
+      });
     } else {
-      val = val.replace(/\+/g, '');
+      // показать кнопку
+      btn.style.display = 'inline-block';
+    }
+  }
+
+  // --- добавление товара (используется делегирование) ---
+  document.querySelectorAll('.toCart').forEach(b => {
+    b.addEventListener('click', (ev) => {
+      const card = ev.target.closest('.card');
+      const sku = card.dataset.sku;
+      const price = Number(card.dataset.price) || 0;
+      const name = card.querySelector('.name').textContent.trim();
+      const cart = loadCart();
+      const ex = cart.find(i => i.s === sku);
+      if (ex) ex.q += 1;
+      else cart.push({ s: sku, n: name, p: price, q: 1 });
+      saveCart(cart);
+      redraw();
+      showToast('Товар добавлен в корзину');
+    });
+  });
+
+  // --- делегирование кликов внутри списка корзины (плюс/минус/удалить) ---
+  list.addEventListener('click', (e) => {
+    const s = e.target.dataset.s;
+    if (!s) return;
+    let cart = loadCart();
+
+    if (e.target.classList.contains('rm')) {
+      cart = cart.filter(i => i.s !== s);
+    } else if (e.target.classList.contains('plus')) {
+      const it = cart.find(i => i.s === s);
+      if (it) it.q += 1;
+    } else if (e.target.classList.contains('minus')) {
+      const it = cart.find(i => i.s === s);
+      if (it) {
+        it.q -= 1;
+        if (it.q <= 0) cart = cart.filter(i => i.s !== s);
+      }
+    }
+    saveCart(cart);
+    redraw();
+  });
+
+  // --- открыть/закрыть модалки ---
+  function open(el){ el.classList.remove('hidden'); }
+  function close(el){ el.classList.add('hidden'); }
+
+  btnCart.addEventListener('click', () => {
+    // перед открытием перерисуем
+    redraw();
+    open(cartBox);
+  });
+  btnCloseCart.addEventListener('click', () => close(cartBox));
+  cartBox.querySelectorAll('.backdrop, .close').forEach(x => {
+    x.addEventListener('click', () => close(cartBox));
+  });
+
+  // кнопка оформить
+  btnCheckout.addEventListener('click', () => {
+    const cart = loadCart();
+    if (!cart.length) { showToast('Корзина пуста'); return; }
+    close(cartBox);
+    open(orderBox);
+    setTimeout(() => orderForm.querySelector('input[name="f"]').focus(), 40);
+  });
+
+  // закрытие оформления
+  cancel.addEventListener('click', () => close(orderBox));
+  orderBox.querySelectorAll('.backdrop, .close').forEach(x => {
+    x.addEventListener('click', () => close(orderBox));
+  });
+
+  // --- валидируем номер телефона по вводимым цифрам ---
+  if (phone) {
+    phone.addEventListener('input', () => {
+      // оставим + и цифры
+      let val = phone.value.replace(/[^\d+]/g, '');
+      if (val.startsWith('+')) {
+        // только один +
+        val = '+' + val.slice(1).replace(/\+/g, '');
+      } else {
+        val = val.replace(/\+/g, '');
+      }
+      let digits = val.replace(/\D/g, '');
+      if (digits.length > 15) digits = digits.slice(0,15);
+      phone.value = val.startsWith('+') ? '+' + digits : digits;
+      if (digits.length > 0 && digits.length < 10) phErr.textContent = 'Введите не менее 10 цифр';
+      else phErr.textContent = '';
+    });
+  }
+
+  // --- обработка отправки формы заказа ---
+  orderForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    // проверим телефон и обязательные поля
+    const fd = new FormData(orderForm);
+    if (!fd.get('f') || !fd.get('l') || !fd.get('addr') || !fd.get('phone')) {
+      phErr.textContent = 'Заполните все поля';
+      return;
+    }
+    const digits = (fd.get('phone') || '').replace(/\D/g, '');
+    if (digits.length < 10) {
+      phErr.textContent = 'Телефон некорректен';
+      return;
     }
 
-    let digits = val.replace(/\D/g, '');
+    // всё ок — очищаем корзину, закрываем модалки, показываем подтверждение
+    saveCart([]);
+    redraw();
+    close(orderBox);
+    close(cartBox);
+    open(doneBox);
+    // скрыть кнопку корзины, чтобы внешний вид был аккуратен
+    btnCart.style.display = 'none';
+  });
 
-    if (digits.length > 15) {
-      digits = digits.slice(0, 15);
-    }
-
-    phoneInput.value = val.startsWith('+') ? '+' + digits : digits;
-
-    if (digits.length > 0 && digits.length < 10) {
-      phoneError.textContent = 'Введите не менее 10 цифр';
-    } else {
-      phoneError.textContent = '';
+  // закрытие окна подтверждения заказа
+  doneClose.addEventListener('click', () => {
+    close(doneBox);
+    btnCart.style.display = ''; // вернуть отображение
+  });
+  doneBox.addEventListener('click', (e) => {
+    if (e.target === doneBox) {
+      close(doneBox);
+      btnCart.style.display = '';
     }
   });
-}
 
+  // ESC — закрывать все модалки
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      close(cartBox); close(orderBox); close(doneBox);
+      btnCart.style.display = '';
+    }
+  });
 
-
-    renderCart();
+  // инициализация: перерисовать один раз при старте
+  redraw();
 });

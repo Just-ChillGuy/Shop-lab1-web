@@ -63,7 +63,7 @@ button{cursor:pointer;border:none;padding:8px 12px;border-radius:8px}
 .qty-wrap button{width:30px;height:30px;border-radius:6px;background:var(--accent);color:#fff;font-weight:700}
 
 /* модальные окна */
-.modal{position:fixed;inset:0;display:flex;align-items:flex-start;justify-content:flex-end;z-index:1400;pointer-events:none}
+.modal{position:fixed;inset:0;display:flex;align-items:flex-start;justify-content:flex-end;padding-top:70px;/z-index:1400;pointer-events:none}
 .modal.hidden{display:none}
 .panel{width:380px;margin:20px;margin-right:18px;background:var(--card);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.12);pointer-events:auto;display:flex;flex-direction:column;overflow:hidden}
 .panel.small{width:360px}

@@ -2,27 +2,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const SKEY = 'ct_cart_v2';
 
-  // элементы на странице (короткие имена)
-  const btnCart = document.getElementById('btnCart');    // кнопка корзины (верхняя)
-  const cnt = document.getElementById('cnt');            // бейдж количества
-  const cartBox = document.getElementById('cartBox');    // модал корзины
-  const list = document.getElementById('list');          // UL с товарами в корзине
-  const sumEl = document.getElementById('sum');          // итоговая сумма
-  const btnCloseCart = document.getElementById('btnCloseCart'); // закрыть корзину
-  const btnCheckout = document.getElementById('btnCheckout');  // оформить заказ
+  const btnCart = document.getElementById('btnCart');    
+  const cnt = document.getElementById('cnt');       
+  const cartBox = document.getElementById('cartBox'); 
+  const list = document.getElementById('list');       
+  const sumEl = document.getElementById('sum');         
+  const btnCloseCart = document.getElementById('btnCloseCart'); 
+  const btnCheckout = document.getElementById('btnCheckout');  
 
-  const orderBox = document.getElementById('orderBox');  // модал оформления
-  const orderForm = document.getElementById('orderForm');//
-  const phone = document.getElementById('phone');        // поле телефона
-  const phErr = document.getElementById('phErr');       // сообщение об ошибке
-  const cancel = document.getElementById('cancel');     // отмена оформления
+  const orderBox = document.getElementById('orderBox');  
+  const orderForm = document.getElementById('orderForm');
+  const phone = document.getElementById('phone');      
+  const phErr = document.getElementById('phErr');       
+  const cancel = document.getElementById('cancel');     
 
-  const doneBox = document.getElementById('doneBox');   // модал "Заказ создан"
+  const doneBox = document.getElementById('doneBox');  
   const doneClose = document.getElementById('doneClose');
 
   const toast = document.getElementById('toast');
 
-  // --- helpers: загрузка/сохранение корзины ---
   function loadCart() {
     try {
       return JSON.parse(localStorage.getItem(SKEY) || '[]');
@@ -34,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem(SKEY, JSON.stringify(arr));
   }
 
-  // --- показать быстрый тост ---
   let _tTimer = null;
   function showToast(txt, ms = 1400) {
     toast.textContent = txt;
@@ -43,22 +40,19 @@ document.addEventListener('DOMContentLoaded', () => {
     _tTimer = setTimeout(() => toast.classList.add('hidden'), ms);
   }
 
-  // --- простая экранизация текста для безопасности вывода ---
   function esc(s) {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c]));
   }
 
-  // --- перерисовать состояние корзины (DOM и итого) ---
   function redraw() {
     const cart = loadCart();
-    list.innerHTML = ''; // очистка списка
+    list.innerHTML = ''; 
     let total = 0;
 
-    // каждый элемент — li со своими контролами (делаем HTML через шаблон)
     cart.forEach(item => {
       total += item.p * item.q;
       const li = document.createElement('li');
-      li.dataset.sku = item.s; // для делегирования
+      li.dataset.sku = item.s; 
       li.innerHTML = `
         <div class="meta">
           <strong>${esc(item.n)}</strong>
@@ -75,39 +69,32 @@ document.addEventListener('DOMContentLoaded', () => {
       list.appendChild(li);
     });
 
-    // бейдж общего количества
     const count = cart.reduce((acc, it) => acc + it.q, 0);
     cnt.textContent = count;
     sumEl.textContent = total.toLocaleString();
 
-    // обновить контролы на карточках (покажем qty на карточках)
     document.querySelectorAll('.card').forEach(card => {
       const sku = card.dataset.sku;
       syncCardControls(sku);
     });
   }
 
-  // --- синхронизировать контролы (кол-во) на карточке товара ---
   function syncCardControls(sku) {
     const cart = loadCart();
     const card = document.querySelector(`.card[data-sku="${sku}"]`);
     if (!card) return;
     const bag = cart.find(i => i.s === sku);
-
-    // удалим старый блок, если есть
     const old = card.querySelector('.qty-wrap');
     if (old) old.remove();
 
     const btn = card.querySelector('.toCart');
     if (bag && bag.q > 0) {
-      // спрячем кнопку и вставим контролы
       btn.style.display = 'none';
       const wrap = document.createElement('div');
       wrap.className = 'qty-wrap';
       wrap.innerHTML = `<button class="c-minus">-</button><span class="c-q">${bag.q}</span><button class="c-plus">+</button>`;
       card.querySelector('.card-actions').appendChild(wrap);
 
-      // события для плюс/минус на карточке
       wrap.querySelector('.c-plus').addEventListener('click', () => {
         bag.q += 1;
         saveCart(cart);
@@ -123,12 +110,10 @@ document.addEventListener('DOMContentLoaded', () => {
         redraw();
       });
     } else {
-      // показать кнопку
       btn.style.display = 'inline-block';
     }
   }
 
-  // --- добавление товара (используется делегирование) ---
   document.querySelectorAll('.toCart').forEach(b => {
     b.addEventListener('click', (ev) => {
       const card = ev.target.closest('.card');
@@ -145,7 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- делегирование кликов внутри списка корзины (плюс/минус/удалить) ---
   list.addEventListener('click', (e) => {
     const s = e.target.dataset.s;
     if (!s) return;
@@ -167,12 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
     redraw();
   });
 
-  // --- открыть/закрыть модалки ---
   function open(el){ el.classList.remove('hidden'); }
   function close(el){ el.classList.add('hidden'); }
 
   btnCart.addEventListener('click', () => {
-    // перед открытием перерисуем
     redraw();
     open(cartBox);
   });
@@ -181,7 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
     x.addEventListener('click', () => close(cartBox));
   });
 
-  // кнопка оформить
   btnCheckout.addEventListener('click', () => {
     const cart = loadCart();
     if (!cart.length) { showToast('Корзина пуста'); return; }
@@ -190,19 +171,15 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => orderForm.querySelector('input[name="f"]').focus(), 40);
   });
 
-  // закрытие оформления
   cancel.addEventListener('click', () => close(orderBox));
   orderBox.querySelectorAll('.backdrop, .close').forEach(x => {
     x.addEventListener('click', () => close(orderBox));
   });
 
-  // --- валидируем номер телефона по вводимым цифрам ---
   if (phone) {
     phone.addEventListener('input', () => {
-      // оставим + и цифры
       let val = phone.value.replace(/[^\d+]/g, '');
       if (val.startsWith('+')) {
-        // только один +
         val = '+' + val.slice(1).replace(/\+/g, '');
       } else {
         val = val.replace(/\+/g, '');
@@ -215,10 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- обработка отправки формы заказа ---
   orderForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    // проверим телефон и обязательные поля
     const fd = new FormData(orderForm);
     if (!fd.get('f') || !fd.get('l') || !fd.get('addr') || !fd.get('phone')) {
       phErr.textContent = 'Заполните все поля';
@@ -229,21 +204,17 @@ document.addEventListener('DOMContentLoaded', () => {
       phErr.textContent = 'Телефон некорректен';
       return;
     }
-
-    // всё ок — очищаем корзину, закрываем модалки, показываем подтверждение
     saveCart([]);
     redraw();
     close(orderBox);
     close(cartBox);
     open(doneBox);
-    // скрыть кнопку корзины, чтобы внешний вид был аккуратен
     btnCart.style.display = 'none';
   });
 
-  // закрытие окна подтверждения заказа
   doneClose.addEventListener('click', () => {
     close(doneBox);
-    btnCart.style.display = ''; // вернуть отображение
+    btnCart.style.display = ''; 
   });
   doneBox.addEventListener('click', (e) => {
     if (e.target === doneBox) {
@@ -252,14 +223,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ESC — закрывать все модалки
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       close(cartBox); close(orderBox); close(doneBox);
       btnCart.style.display = '';
     }
   });
-
-  // инициализация: перерисовать один раз при старте
   redraw();
 });
